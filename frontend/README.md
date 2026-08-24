@@ -1,38 +1,36 @@
-# Concert Manager - Admin Web (Next.js)
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-Konversi dari desain HTML/Tailwind (Google Stitch) ke Next.js App Router + TypeScript + Tailwind CSS.
+## Getting Started
 
-## Halaman
-
-| Route | Deskripsi |
-| --- | --- |
-| `/login` | Admin login |
-| `/dashboard` | Dashboard overview (stat cards, chart, transaksi terbaru) |
-| `/artis` | Kelola Artis (tabel + modal tambah/edit) |
-| `/event` | Kelola Event (tabel + filter + toggle status penjualan) |
-| `/kategori-tiket` | Manajemen Kategori Tiket (metrik + tabel kuota + modal tambah) |
-| `/verifikasi` | Verifikasi Transaksi (tabel + modal preview bukti bayar) |
-| `/pengguna` | Kelola Pengguna (stat cards + tabel + live search filter) |
-| `/laporan` | Laporan Analitik (summary cards, chart tren, sales by category, top locations) |
-| `/pengaturan` | Pengaturan Sistem (tabs General/Branding/Security/Notifications, form, toggle maintenance mode) |
-
-Layout sidebar & topbar admin dipusatkan di `src/components/AdminLayout.tsx` supaya konsisten di semua halaman (di desain asli tiap file HTML punya markup sidebar duplikat sendiri-sendiri).
-
-Warna, tipografi, radius, dan spacing diambil dari `sonic_admin/DESIGN.md` / konfigurasi Tailwind di tiap `code.html`, dipindahkan ke `tailwind.config.ts`.
-
-## Menjalankan project
-
-Project ini dibuat manual (tanpa akses internet di lingkungan kerja saya), jadi `node_modules` belum ter-install. Di komputermu:
+First, run the development server:
 
 ```bash
-npm install
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-Lalu buka `http://localhost:3000` (otomatis redirect ke `/login`).
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Catatan
+You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
-- Gambar (foto artis, poster event, avatar admin, bukti transfer) masih memakai URL placeholder dari desain asli (`lh3.googleusercontent.com`) — domain ini sudah didaftarkan di `next.config.mjs` supaya `next/image` bisa memuatnya. Ganti dengan aset/API asli saat backend Express sudah tersedia.
-- Semua data (artis, event, kategori tiket, transaksi) masih hardcoded di tiap `page.tsx` (`const ARTISTS = [...]`, dst). Nanti tinggal diganti fetch ke API backend.
-- Tombol form (Save Artist, Simpan Kategori, Verify & Approve, dll) belum terhubung ke backend — masih UI-only sesuai desain.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
