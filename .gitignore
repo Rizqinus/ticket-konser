@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
+.pnp.*
+
+# Next.js & Build outputs
+.next/
+**/.next/
+out/
+**/out/
+build/
+**/build/
+dist/
+**/dist/
+
+# Expo & Mobile
+.expo/
+**/.expo/
+web-build/
+**/web-build/
+mobile/.idea/
+mobile/.gradle/
+mobile/build/
+.kotlin/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Environment variables & secrets (CRITICAL: Do NOT commit secrets)
+.env
+.env.*
+.env*.local
+*.env
+**/.env
+**/.env.*
+**/.env*.local
+
+# Logs & Debugging
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+*.pem
+
+# Editor & AI tool configs
+.vscode/
+.idea/
+*.swp
+*.swo
+.claude/
+.agents/
