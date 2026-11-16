@@ -11,34 +11,29 @@ types.setTypeParser(1700, (val) => (val === null ? null : parseFloat(val)));
 // 3. OID 20 (BIGINT / COUNT) -> Kembalikan sebagai integer
 types.setTypeParser(20, (val) => (val === null ? null : parseInt(val, 10)));
 
-const isSupabase = Boolean(process.env.SUPABASE_HOST || process.env.SUPABASE_URL);
-
-let pool;
-if (isSupabase) {
-  pool = new Pool({
-    host: process.env.SUPABASE_HOST,
-    port: parseInt(process.env.SUPABASE_PORT || "5432", 10),
-    user: process.env.SUPABASE_USER,
-    password: process.env.SUPABASE_PASSWORD,
-    database: process.env.SUPABASE_DATABASE || "postgres",
-    ssl: { rejectUnauthorized: false },
-    max: 20,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
-  });
-} else {
-  // Fallback MySQL jika variabel Supabase belum disetel
-  const mysql = require("mysql2/promise");
-  const fallbackDb = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
-  });
-  module.exports = fallbackDb;
-  return;
+if (!process.env.SUPABASE_HOST && !process.env.SUPABASE_URL) {
+  throw new Error("Koneksi database Supabase tidak ditemukan. Harap pastikan SUPABASE_HOST / SUPABASE_URL telah diisi pada file .env.");
 }
+
+const pool = process.env.SUPABASE_URL
+  ? new Pool({
+      connectionString: process.env.SUPABASE_URL,
+      ssl: { rejectUnauthorized: false },
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    })
+  : new Pool({
+      host: process.env.SUPABASE_HOST,
+      port: parseInt(process.env.SUPABASE_PORT || "5432", 10),
+      user: process.env.SUPABASE_USER,
+      password: process.env.SUPABASE_PASSWORD,
+      database: process.env.SUPABASE_DATABASE || "postgres",
+      ssl: { rejectUnauthorized: false },
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    });
 
 // Konversi query MySQL (? placeholders, INTERVAL, IFNULL, dll.) ke dialek PostgreSQL
 function convertSql(sql) {

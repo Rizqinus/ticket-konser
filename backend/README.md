@@ -11,7 +11,7 @@ npm run migrate
 npm run dev
 ```
 
-`.env`: Kredensial database Supabase / MySQL, `JWT_SECRET`, `PORT`.
+`.env`: Kredensial database Supabase PostgreSQL, `JWT_SECRET`, `PORT`.
 Bukti transfer manual disimpan di `uploads/proofs/` (tidak diakses publik, lihat `GET /api/admin/payments/:id/proof`).
 
 Cek alur pembayaran tanpa database: `node tests/payment.check.js`
