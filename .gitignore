@@ -1,41 +1,61 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
 .pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 
-# testing
-/coverage
+# Next.js & Build outputs
+.next/
+**/.next/
+out/
+**/out/
+build/
+**/build/
+dist/
+**/dist/
 
-# next.js
-/.next/
-/out/
+# Expo & Mobile
+.expo/
+**/.expo/
+web-build/
+**/web-build/
+mobile/.idea/
+mobile/.gradle/
+mobile/build/
+.kotlin/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
 
-# production
-/build
+# Environment variables & secrets (CRITICAL: Do NOT commit secrets)
+.env
+.env.*
+.env*.local
+*.env
+**/.env
+**/.env.*
+**/.env*.local
+!.env.example
+!**/.env.example
 
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Logs & Debugging
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# OS Files
+.DS_Store
+Thumbs.db
+*.pem
 
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# Editor & AI tool configs
+.vscode/
+.idea/
+*.swp
+*.swo
+.claude/
+.agents/
