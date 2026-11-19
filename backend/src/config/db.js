@@ -46,6 +46,9 @@ function convertSql(sql) {
   // Penyesuaian fungsi null: IFNULL -> COALESCE
   s = s.replace(/\bIFNULL\s*\(/gi, "COALESCE(");
 
+  // Penyesuaian casting ENUM ticket_class saat menggunakan fungsi teks LOWER()
+  s = s.replace(/\bLOWER\s*\(\s*class\s*\)/gi, "LOWER(class::text)");
+
   // Jika INSERT belum memiliki klausa RETURNING, tambahkan RETURNING * untuk mendapatkan id
   const clean = s.replace(/\/\*[\s\S]*?\*\/|--.*$/gm, "").trim().toUpperCase();
   if (clean.startsWith("INSERT") && !clean.includes("RETURNING")) {

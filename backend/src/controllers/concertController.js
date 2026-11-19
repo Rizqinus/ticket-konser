@@ -248,27 +248,33 @@ const createConcert = async (req, res) => {
             artistId = newArtist.insertId;
           }
         } else if (typeof item === "object" && item !== null) {
-          if (item.id) {
-            artistId = item.id;
-            artistName = item.name || "";
-            if (item.image) {
-              await db.query(
-                `UPDATE artists SET image = ?, description = COALESCE(?, description) WHERE id = ?`,
-                [item.image, item.description || null, artistId]
-              );
+          const numericId = item.id && !isNaN(Number(item.id)) ? Number(item.id) : null;
+          artistName = (item.name || "").toString().trim();
+
+          if (numericId) {
+            const [exist] = await db.query(`SELECT id, name FROM artists WHERE id = ?`, [numericId]);
+            if (exist.length > 0) {
+              artistId = exist[0].id;
+              if (item.image || item.description) {
+                await db.query(
+                  `UPDATE artists SET image = COALESCE(?, image), description = COALESCE(?, description) WHERE id = ?`,
+                  [item.image || null, item.description || null, artistId]
+                );
+              }
             }
-          } else if (item.name && item.name.trim()) {
-            artistName = item.name.trim();
+          }
+
+          if (!artistId && artistName) {
             const [exist] = await db.query(
               `SELECT id, name FROM artists WHERE LOWER(name) = LOWER(?) LIMIT 1`,
               [artistName]
             );
             if (exist.length > 0) {
               artistId = exist[0].id;
-              if (item.image) {
+              if (item.image || item.description) {
                 await db.query(
-                  `UPDATE artists SET image = ?, description = COALESCE(?, description) WHERE id = ?`,
-                  [item.image, item.description || null, artistId]
+                  `UPDATE artists SET image = COALESCE(?, image), description = COALESCE(?, description) WHERE id = ?`,
+                  [item.image || null, item.description || null, artistId]
                 );
               }
             } else {
@@ -288,7 +294,7 @@ const createConcert = async (req, res) => {
         if (artistId) {
           try {
             await db.query(
-              `INSERT INTO concert_artists (concert_id, artist_id) VALUES (?, ?)`,
+              `INSERT INTO concert_artists (concert_id, artist_id) VALUES (?, ?) ON CONFLICT DO NOTHING`,
               [concertId, artistId]
             );
             insertedArtists.push({ id: artistId, name: artistName });
@@ -371,6 +377,11 @@ const updateConcert = async (req, res) => {
     // Pertahankan deskripsi lama jika deskripsi baru tidak diisi atau kosong
     const finalDescription = description !== undefined && description !== "" ? description : current.description;
 
+    const validStatuses = ["upcoming", "ongoing", "finished"];
+    const finalStatus = validStatuses.includes(String(status).toLowerCase().trim())
+      ? String(status).toLowerCase().trim()
+      : "upcoming";
+
     // Update data konser
     await db.query(
       `UPDATE concerts
@@ -390,7 +401,7 @@ const updateConcert = async (req, res) => {
         concert_date,
         concert_time || current.concert_time || "19:00:00",
         finalImage || null,
-        status || "upcoming",
+        finalStatus,
         id,
       ]
     );
@@ -415,7 +426,7 @@ const updateConcert = async (req, res) => {
 
         const ticketName = (t.name || validClass).toString().trim();
         const [existing] = await db.query(
-          "SELECT id FROM ticket_categories WHERE concert_id = ? AND (LOWER(class) = LOWER(?) OR LOWER(name) = LOWER(?)) ORDER BY id ASC",
+          "SELECT id FROM ticket_categories WHERE concert_id = ? AND (LOWER(class::text) = LOWER(?) OR LOWER(name) = LOWER(?)) ORDER BY id ASC",
           [id, validClass, validClass]
         );
 
@@ -427,7 +438,11 @@ const updateConcert = async (req, res) => {
           // Hapus baris duplikat jika ada lebih dari 1 untuk kelas yang sama
           if (existing.length > 1) {
             for (let i = 1; i < existing.length; i++) {
-              await db.query("DELETE FROM ticket_categories WHERE id = ?", [existing[i].id]);
+              try {
+                await db.query("DELETE FROM ticket_categories WHERE id = ?", [existing[i].id]);
+              } catch (delErr) {
+                console.warn("Could not delete duplicate ticket category:", delErr.message);
+              }
             }
           }
         } else {
@@ -475,26 +490,43 @@ const updateConcert = async (req, res) => {
             artistId = newArtist.insertId;
           }
         } else if (typeof item === "object" && item !== null) {
-          if (item.id) {
-            artistId = item.id;
-            if (item.image) {
-              await db.query(`UPDATE artists SET image = ?, description = COALESCE(?, description) WHERE id = ?`, [item.image, item.description, artistId]);
+          const numericId = item.id && !isNaN(Number(item.id)) ? Number(item.id) : null;
+          artistName = (item.name || "").toString().trim();
+
+          if (numericId) {
+            const [exist] = await db.query(`SELECT id, name FROM artists WHERE id = ?`, [numericId]);
+            if (exist.length > 0) {
+              artistId = exist[0].id;
+              if (item.image || item.description) {
+                await db.query(
+                  `UPDATE artists SET image = COALESCE(?, image), description = COALESCE(?, description) WHERE id = ?`,
+                  [item.image || null, item.description || null, artistId]
+                );
+              }
             }
-          } else if (item.name && item.name.trim()) {
-            artistName = item.name.trim();
+          }
+
+          if (!artistId && artistName) {
             const [exist] = await db.query(
               `SELECT id, name FROM artists WHERE LOWER(name) = LOWER(?) LIMIT 1`,
               [artistName]
             );
             if (exist.length > 0) {
               artistId = exist[0].id;
-              if (item.image) {
-                await db.query(`UPDATE artists SET image = ?, description = COALESCE(?, description) WHERE id = ?`, [item.image, item.description, artistId]);
+              if (item.image || item.description) {
+                await db.query(
+                  `UPDATE artists SET image = COALESCE(?, image), description = COALESCE(?, description) WHERE id = ?`,
+                  [item.image || null, item.description || null, artistId]
+                );
               }
             } else {
               const [newArtist] = await db.query(
                 `INSERT INTO artists (name, description, image) VALUES (?, ?, ?)`,
-                [artistName, item.description || `Pengisi acara konser ${title}`, item.image || "/concerts/indie-guitarist.jpg"]
+                [
+                  artistName,
+                  item.description || `Pengisi acara konser ${title}`,
+                  item.image || "/concerts/indie-guitarist.jpg",
+                ]
               );
               artistId = newArtist.insertId;
             }
@@ -507,7 +539,9 @@ const updateConcert = async (req, res) => {
               `INSERT INTO concert_artists (concert_id, artist_id) VALUES (?, ?) ON CONFLICT DO NOTHING`,
               [id, artistId]
             );
-          } catch (dupErr) {}
+          } catch (dupErr) {
+            console.warn("Could not link concert_artists:", dupErr.message);
+          }
         }
       }
     }
@@ -556,6 +590,13 @@ const deleteConcert = async (req, res) => {
 
   } catch (error) {
     console.error("Delete Concert Error:", error);
+
+    if (error.code === "23503") {
+      return res.status(400).json({
+        success: false,
+        message: "Tidak dapat menghapus konser ini karena sudah ada pesanan atau tiket yang terbit.",
+      });
+    }
 
     res.status(500).json({
       success: false,

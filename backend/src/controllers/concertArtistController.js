@@ -119,8 +119,8 @@ const addArtistToConcert = async (req, res) => {
       },
     });
   } catch (error) {
-    // Duplicate artist di concert yang sama
-    if (error.code === "ER_DUP_ENTRY") {
+    // Duplicate artist di concert yang sama (MySQL ER_DUP_ENTRY atau Postgres 23505)
+    if (error.code === "ER_DUP_ENTRY" || error.code === "23505") {
       return res.status(409).json({
         success: false,
         message: "Artist is already in this concert",
